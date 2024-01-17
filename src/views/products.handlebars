@@ -1,5 +1,5 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-<h1>Bienvenido, {{usuario.nombre}} {{usuario.apellido}} ({{usuario.email}}) - Rol: {{#if usuario.admin}}admin{{else}}usuario{{/if}}</h1>
+<h1>Bienvenido, {{usuario.first_name}} {{usuario.last_name}}  - Rol: {{usuario.role}}</h1>
 <h2>Lista de Productos</h2>
 <ul>
     {{#each products.payload}}

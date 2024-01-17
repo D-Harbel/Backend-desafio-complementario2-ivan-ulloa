@@ -1,6 +1,7 @@
 const passport = require('passport')
 const local = require('passport-local')
 const usuariosModelo = require('../dao/models/usermodel')
+const Cart = require('../dao/models/cartModel')
 const { creaHash, validaPassword } = require('../utils')
 
 const inicializarPassport = () => {
@@ -34,12 +35,19 @@ const inicializarPassport = () => {
 
                 password = creaHash(password)
                 console.log(password)
+
                 let usuario
+                let nuevoCarrito;
+
                 try { 
-                    usuario = await usuariosModelo.create({ first_name, last_name, email, password, age })
+                    nuevoCarrito = await Cart.create({ usuario: null, products: [] });
+                    usuario = await usuariosModelo.create({ first_name, last_name, email, password, age, role: 'user', cart: nuevoCarrito._id });
+
+                    await Cart.findByIdAndUpdate(nuevoCarrito._id, { usuario: usuario._id });
                     return done(null, usuario)
 
                 } catch (error) {
+                    console.error(error);
                     return done(null, false)
                 }
             } catch (error) {
@@ -57,42 +65,43 @@ const inicializarPassport = () => {
         async (username, password, done) => {
             try {
                 if (!username || !password) {
+                    return done(null, false, { message: 'All fields are required' })
+                }
+
+                if (username === 'adminCoder@coder.com' && password === 'adminCod3r123') {
+                    const adminUser = {
+                        first_name: 'Admin',
+                        last_name: 'Coder',
+                        age: 99,
+                        email: 'adminCoder@coder.com',
+                        role: 'admin',
+                        cart: '65a8475e30b68acfb603a9a4'
+                    };
+
+                    return done(null, adminUser)
+                }
+
+                let usuario = await usuariosModelo.findOne({ email: username }).lean();
+
+                if (!usuario) {
+                    console.log('Usuario no encontrado en la base de datos');
                     return done(null, false);
                 }
 
-                let usuario;
-
-                if (username === 'adminCoder@coder.com' && password === 'adminCod3r123') {
-                    usuario = {
-                        first_name: 'Admin',
-                        last_name: 'Coder',
-                        email: 'adminCoder@coder.com',
-                        admin: true,
-                    };
-                } else {
-                    usuario = await usuariosModelo.findOne({ email: username }).lean();
-                    if (!usuario) {
-                        console.log('Usuario no encontrado en la base de datos');
-                        return done(null, false);
-                    }
-
-                    if (!validaPassword(usuario, password)) {
-                        return done(null, false);
-                    }
+                if (!validaPassword(usuario, password)) {
+                    return done(null, false);
                 }
+                delete usuario.password
+                return done(null, usuario)
 
-                console.log('Usuario autenticado:', usuario);
-                console.log(Object.keys(usuario));
-                delete usuario.password;
-                return done(null, usuario);
             } catch (error) {
-                done(error, null);
+                done(error, null)
             }
         }
-    ));
+    ))
 
     passport.serializeUser((usuario, done) => {
-        if (usuario.admin) {
+        if (usuario.role) {
             return done(null, 'admin');
         } else {
             return done(null, usuario._id);
@@ -102,10 +111,10 @@ const inicializarPassport = () => {
     passport.deserializeUser(async (id, done) => {
         if (id === 'admin') {
             return done(null, {
-                first_name: 'Admin',
-                last_name: 'Coder',
+                nombre: 'Admin',
+                apellido: 'Coder',
                 email: 'adminCoder@coder.com',
-                admin: true
+                role: 'admin',
             });
         } else {
             try {

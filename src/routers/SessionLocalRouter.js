@@ -18,7 +18,7 @@ module.exports = function (io) {
             last_name: req.user.last_name,
             age: req.user.age,
             email: req.user.email,
-            admin: req.user.admin || false,
+            role: req.user.role || 'user',
         };
 
         res.redirect('/views/products')
