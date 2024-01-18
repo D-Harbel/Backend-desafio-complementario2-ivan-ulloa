@@ -121,13 +121,13 @@ io.on('connection', async (socket) => {
     const products = await ProductDao.getProducts({ limit: 50});
     socket.emit('products', products);
 
-    socket.on('addToCart', async ({ productId, productName }) => {
+    socket.on('addToCart', async ({ productId, productName, userRole }) => {
         try {
 
-            const cartId = "6585aebbfcb39ade17d125d0";
+
             const quantity = 1;
 
-            await CartDao.addProductToCart(cartId, productId, quantity);
+            await CartDao.addProductToCart(userRole, productId, quantity);
 
             console.log(`Producto "${productName}" agregado al carrito`);
 

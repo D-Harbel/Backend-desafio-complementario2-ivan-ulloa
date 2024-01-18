@@ -1,12 +1,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-<h1>Bienvenido, {{usuario.first_name}} {{usuario.last_name}}  - Rol: {{usuario.role}}</h1>
+<h1>Bienvenido, {{usuario.first_name}} {{usuario.last_name}} - Rol: {{usuario.role}}</h1>
 <h2>Lista de Productos</h2>
+<div id="userRole" data-role="{{usuario.cartID}}"></div>
 <ul>
     {{#each products.payload}}
     <li>
         nombre: {{this.title}} - categoria: {{this.category}} - precio:{{this.price}}
-        <button class="addToCartBtn" onclick="addToCart('{{this._id}}', '{{this.title}}')" disabled>Agregar al
-            carrito</button> <hr> <br>
+        <button class="addToCartBtn" onclick="addToCart('{{this._id}}', '{{this.title}}' )" disabled>Agregar al
+            carrito</button>
+        <hr> <br>
     </li>
     {{/each}}
 </ul>
@@ -20,6 +22,8 @@
 {{/if}}
 
 <script>
+
+    const userRole = document.getElementById('userRole').getAttribute('data-role');
     const socket = io();
 
     socket.on('connect', () => {
@@ -50,7 +54,7 @@
         console.log(socket);
 
         if (typeof socket !== 'undefined' && socket.connected) {
-            socket.emit('addToCart', { productId, productName });
+            socket.emit('addToCart', { productId, productName, userRole });
         } else {
             console.error('Socket no definido o no conectado');
         }

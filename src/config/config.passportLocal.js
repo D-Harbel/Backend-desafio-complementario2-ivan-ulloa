@@ -114,6 +114,7 @@ const inicializarPassport = () => {
                 nombre: 'Admin',
                 apellido: 'Coder',
                 email: 'adminCoder@coder.com',
+                cart: '65a8475e30b68acfb603a9a4',
                 role: 'admin',
             });
         } else {

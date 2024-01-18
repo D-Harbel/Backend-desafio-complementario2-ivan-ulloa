@@ -8,10 +8,26 @@ module.exports = function (io) {
     router.get('/callbackGithub', passport.authenticate('github', { failureRedirect: "/api/github/errorGithub" }), (req, res) => {
         req.session.isAuthenticated = true;
         console.log(req.user)
-        req.session.usuario = req.user
-        res.setHeader('Content-Type', 'application/json');
+        req.session.usuario = {
+            cartID: req.user.cart.toString(),
+            first_name: req.user.first_name,
+            email: req.user.email,
+            role: req.user.role || 'user',
+        };
         res.redirect('/views/products')
 
+    });
+
+    router.get('/current', (req, res) => {
+        if (req.session.isAuthenticated) {
+            return res.status(200).json({
+                user: req.session.usuario
+            });
+        } else {
+            return res.status(401).json({
+                error: 'No hay usuario autenticado'
+            });
+        }
     });
 
     router.get('/errorGithub', (req, res) => {

@@ -14,6 +14,7 @@ module.exports = function (io) {
         console.log(req.user)
 
         req.session.usuario = {
+            cartID: req.user.cart.toString(),
             first_name: req.user.first_name,
             last_name: req.user.last_name,
             age: req.user.age,
@@ -34,6 +35,18 @@ module.exports = function (io) {
         let { email } = req.body
         res.redirect(`/login?mensaje=Usuario ${email} registrado correctamente`)
     })
+
+    router.get('/current', (req, res) => {
+        if (req.session.isAuthenticated) {
+            return res.status(200).json({
+                user: req.session.usuario
+            });
+        } else {
+            return res.status(401).json({
+                error: 'No hay usuario autenticado'
+            });
+        }
+    });
 
     router.get('/logout', (req, res) => {
 
